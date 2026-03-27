@@ -8,11 +8,15 @@ int main(void) {
   // float angle = 0;
   float rotation = 0.0f;
 
+  // Initialisation 
+  
   const int screenWidth = 800;
   const int screenHeight = 450;
 
   InitWindow(screenWidth, screenHeight, "raylib window");
 
+  
+  
   SetTargetFPS(60);
 
   while (!WindowShouldClose()) {
