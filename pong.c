@@ -16,11 +16,14 @@ int main(void) {
   InitWindow(screenWidth, screenHeight, "raylib window");
 
   // add rectangle position - could init here
-
+  // this inits the position
   Vector2 rectPosition = {(float)screenHeight / 2 - 50, (float)screenWidth / 2};
-  SetTargetFPS(60);
-
   Vector2 rectSize = {50, 50};
+
+  Vector2 ballPosition = {(float)screenHeight / 2, (float)screenWidth / 2};
+  Vector2 ballSize = {20, 20};
+
+  SetTargetFPS(60);
 
   // game loop - does not close until window is shut
   while (!WindowShouldClose()) {
@@ -43,6 +46,9 @@ int main(void) {
     // DrawText("First window", 190, 200, 20, LIGHTGRAY);
 
     DrawRectangleV(rectPosition, rectSize, RED);
+
+    // ball
+    DrawCircleV(ballPosition, 20, GREEN);
 
     // DrawRectangle(screenWidth - 50 - 20, screenHeight / 2 - 50, 50, 100,
     // BLUE);
