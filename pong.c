@@ -47,7 +47,7 @@ int main(void) {
 
     DrawRectangleV(rectPosition, rectSize, RED);
 
-    // ball
+    // ball - bounce off of object
     DrawCircleV(ballPosition, 20, GREEN);
 
     // DrawRectangle(screenWidth - 50 - 20, screenHeight / 2 - 50, 50, 100,
