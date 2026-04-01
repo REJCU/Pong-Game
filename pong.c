@@ -1,4 +1,5 @@
 #include <raylib.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -6,22 +7,33 @@
 
 int main(void) {
   // float angle = 0;
-  float rotation = 0.0f;
+  //float rotation = 0.0f;
 
   // Initialisation
 
   const int screenWidth = 800;
-  const int screenHeight = 450;
+  const int screenHeight = 800;
 
+  SetConfigFlags(FLAG_MSAA_4X_HINT);
   InitWindow(screenWidth, screenHeight, "raylib window");
 
   // add rectangle position - could init here
   // this inits the position
-  Vector2 rectPosition = {(float)screenHeight / 2 - 50, (float)screenWidth / 2};
-  Vector2 rectSize = {50, 50};
+  Vector2 rectPosition = { GetScreenWidth() / 2.0f, GetScreenHeight() / 2.0};
+  Vector2 rectSize = {100, 50};
+  // Vector2 rectSpeed = {5.0f, 4.0f};
 
-  Vector2 ballPosition = {(float)screenHeight / 2, (float)screenWidth / 2};
+  Vector2 ballPosition = { GetScreenWidth() / 2.0f, GetScreenWidth() / 2.0f};
+  
+  Vector2 ballSpeed = {5.0f, 4.0f }; 
   Vector2 ballSize = {20, 20};
+  int ballRadius = 20; 
+  float gravity = 0.2f;
+
+
+  //bool useGravity = true;
+  bool pause = 0;
+  int framesCounter = 0; 
 
   SetTargetFPS(60);
 
@@ -29,15 +41,39 @@ int main(void) {
   while (!WindowShouldClose()) {
 
     if (IsKeyDown(KEY_RIGHT))
-      rectPosition.x += 2.0f;
+      rectPosition.x += 5.0f;
     if (IsKeyDown(KEY_LEFT))
-      rectPosition.x -= 2.0f;
+      rectPosition.x -= 5.0f;
     if (IsKeyDown(KEY_UP))
-      rectPosition.y -= 2.0f;
+      rectPosition.y -= 5.0f;
     if (IsKeyDown(KEY_DOWN))
-      rectPosition.y += 2.0f;
+      rectPosition.y += 5.0f;
 
+    // calculating the ball position
+    ballPosition.x += ballSpeed.x;
+    ballPosition.y += ballSpeed.y;
+
+    //if (useGravity) ballSpeed.y += gravity;
+
+    // Check collison of walls for bouncing 
+    if ((ballPosition.x >= (GetScreenWidth() - ballRadius)) || (ballPosition.x <= ballRadius)) ballSpeed.x *= -1.0f; 
+    if ((ballPosition.y >= (GetScreenWidth() - ballRadius)) || (ballPosition.y <= ballRadius)) ballSpeed.y *= -0.95f; 
     // rotation += 0.2f;
+   
+
+    Rectangle paddleRect = { rectPosition.x, rectPosition.y, rectSize.x, rectSize.y};
+    
+    if (CheckCollisionCircleRec( ballPosition, ballRadius, paddleRect)) {
+        ballSpeed.x *= -1.0f;
+        ballSpeed.y *= -1.0f;
+    }
+
+    
+    // Check collison for rectangle of walls 
+    if paddleRect
+
+    
+    //else framesCounter++;
 
     BeginDrawing();
 
@@ -61,4 +97,4 @@ int main(void) {
   CloseWindow();
 
   return 0;
-}
+  }
