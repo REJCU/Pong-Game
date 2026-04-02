@@ -19,9 +19,11 @@ int main(void) {
 
   // add rectangle position - could init here
   // this inits the position
-  Vector2 rectPosition = { GetScreenWidth() / 2.0f, GetScreenHeight() / 2.0};
+  Vector2 rectPosition = { GetScreenWidth() / 2.0f, GetScreenHeight() / 2.0f};
   Vector2 rectSize = {100, 50};
   // Vector2 rectSpeed = {5.0f, 4.0f};
+  
+  Rectangle paddleRect = { rectPosition.x, rectPosition.y, rectSize.x, rectSize.y};
 
   Vector2 ballPosition = { GetScreenWidth() / 2.0f, GetScreenWidth() / 2.0f};
   
@@ -40,14 +42,16 @@ int main(void) {
   // game loop - does not close until window is shut
   while (!WindowShouldClose()) {
 
+
+
     if (IsKeyDown(KEY_RIGHT))
-      rectPosition.x += 5.0f;
+      paddleRect.x += 5.0f;
     if (IsKeyDown(KEY_LEFT))
-      rectPosition.x -= 5.0f;
+      paddleRect.x -= 5.0f;
     if (IsKeyDown(KEY_UP))
-      rectPosition.y -= 5.0f;
+      paddleRect.y -= 5.0f;
     if (IsKeyDown(KEY_DOWN))
-      rectPosition.y += 5.0f;
+      paddleRect.y += 5.0f;
 
     // calculating the ball position
     ballPosition.x += ballSpeed.x;
@@ -61,7 +65,6 @@ int main(void) {
     // rotation += 0.2f;
    
 
-    Rectangle paddleRect = { rectPosition.x, rectPosition.y, rectSize.x, rectSize.y};
     
     if (CheckCollisionCircleRec( ballPosition, ballRadius, paddleRect)) {
         ballSpeed.x *= -1.0f;
@@ -70,8 +73,17 @@ int main(void) {
 
     
     // Check collison for rectangle of walls 
-    if paddleRect
+    if ((paddleRect.x + paddleRect.width) >= GetScreenWidth()) 
+        { paddleRect.x = GetScreenWidth() - paddleRect.width; 
+    } else if ( paddleRect.x <= 0) { 
+        paddleRect.x = 0;
+    }
 
+    if ((paddleRect.y + paddleRect.height) >= GetScreenHeight()) {
+        paddleRect.y = GetScreenHeight() - paddleRect.height;
+    } else if (paddleRect.y <= 0) {
+        paddleRect.y = 0;
+    }
     
     //else framesCounter++;
 
@@ -81,7 +93,7 @@ int main(void) {
 
     // DrawText("First window", 190, 200, 20, LIGHTGRAY);
 
-    DrawRectangleV(rectPosition, rectSize, RED);
+    DrawRectangleRec(paddleRect, RED);
 
     // ball - bounce off of object
     DrawCircleV(ballPosition, 20, GREEN);
