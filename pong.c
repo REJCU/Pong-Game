@@ -5,6 +5,14 @@
 #include <string.h>
 #include <unistd.h>
 
+typedef struct Paddle {
+    Rectangle rect; 
+    float speed; 
+    Color color; 
+} Paddle;
+
+
+
 int main(void) {
   // float angle = 0;
   //float rotation = 0.0f;
@@ -22,7 +30,8 @@ int main(void) {
   Vector2 rectPosition = { GetScreenWidth() / 2.0f, GetScreenHeight() / 2.0f};
   Vector2 rectSize = {100, 50};
   // Vector2 rectSpeed = {5.0f, 4.0f};
-  
+
+
   Rectangle paddleRect = { rectPosition.x, rectPosition.y, rectSize.x, rectSize.y};
 
   Vector2 ballPosition = { GetScreenWidth() / 2.0f, GetScreenWidth() / 2.0f};
@@ -32,6 +41,17 @@ int main(void) {
   int ballRadius = 20; 
   float gravity = 0.2f;
 
+  Paddle player = {
+      {rectPosition.x, rectPosition.y, rectSize.x, rectSize.y},
+         5.0f, 
+         RED
+  }; 
+
+  Paddle enemy = {
+      {rectPosition.x, rectPosition.y, rectSize.x, rectSize.y},
+      5.0f, 
+      BLUE
+  }; 
 
   //bool useGravity = true;
   bool pause = 0;
@@ -45,13 +65,13 @@ int main(void) {
 
 
     if (IsKeyDown(KEY_RIGHT))
-      paddleRect.x += 5.0f;
+      player.rect.x += 5.0f;
     if (IsKeyDown(KEY_LEFT))
-      paddleRect.x -= 5.0f;
+      player.rect.x -= 5.0f;
     if (IsKeyDown(KEY_UP))
-      paddleRect.y -= 5.0f;
+      player.rect.y -= 5.0f;
     if (IsKeyDown(KEY_DOWN))
-      paddleRect.y += 5.0f;
+      player.rect.y += 5.0f;
 
     // calculating the ball position
     ballPosition.x += ballSpeed.x;
@@ -66,23 +86,23 @@ int main(void) {
    
 
     
-    if (CheckCollisionCircleRec( ballPosition, ballRadius, paddleRect)) {
+    if (CheckCollisionCircleRec( ballPosition, ballRadius, player.rect)) {
         ballSpeed.x *= -1.0f;
         ballSpeed.y *= -1.0f;
     }
 
     
     // Check collison for rectangle of walls 
-    if ((paddleRect.x + paddleRect.width) >= GetScreenWidth()) 
-        { paddleRect.x = GetScreenWidth() - paddleRect.width; 
-    } else if ( paddleRect.x <= 0) { 
-        paddleRect.x = 0;
+    if ((player.rect.x + player.rect.width) >= GetScreenWidth()) 
+        {player.rect.x = GetScreenWidth() -player.rect.width; 
+    } else if (player.rect.x <= 0) { 
+        player.rect.x = 0;
     }
 
-    if ((paddleRect.y + paddleRect.height) >= GetScreenHeight()) {
-        paddleRect.y = GetScreenHeight() - paddleRect.height;
-    } else if (paddleRect.y <= 0) {
-        paddleRect.y = 0;
+    if ((player.rect.y +player.rect.height) >= GetScreenHeight()) {
+        player.rect.y = GetScreenHeight() - player.rect.height;
+    } else if (player.rect.y <= 0) {
+        player.rect.y = 0;
     }
     
     //else framesCounter++;
@@ -93,8 +113,10 @@ int main(void) {
 
     // DrawText("First window", 190, 200, 20, LIGHTGRAY);
 
-    DrawRectangleRec(paddleRect, RED);
-
+    // DrawRectangleRec(paddleRect, RED);
+    DrawRectangleRec(player.rect, player.color);
+    DrawRectangleRec(enemy.rect, enemy.color);
+    
     // ball - bounce off of object
     DrawCircleV(ballPosition, 20, GREEN);
 
