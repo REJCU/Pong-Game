@@ -63,7 +63,17 @@ int main(void) {
   while (!WindowShouldClose()) {
 
 
+    // cpu logic
+    if (enemy.rect.y += GetScreenHeight()/2.0f > ballPosition.y)
+    {
+        enemy.rect.y = enemy.rect.y - enemy.speed; 
+    }
 
+    if (enemy.rect.y += GetScreenHeight()/2.0f < ballPosition.y)
+    {
+        enemy.rect.x = enemy.rect.x + enemy.speed; 
+    }
+                                               
     if (IsKeyDown(KEY_RIGHT))
       player.rect.x += 5.0f;
     if (IsKeyDown(KEY_LEFT))
@@ -91,6 +101,12 @@ int main(void) {
         ballSpeed.y *= -1.0f;
     }
 
+
+    if (CheckCollisionCircleRec( ballPosition, ballRadius, enemy.rect)) {
+        ballSpeed.x *= -1.0f;
+        ballSpeed.y *= -1.0f;
+    }
+
     
     // Check collison for rectangle of walls 
     if ((player.rect.x + player.rect.width) >= GetScreenWidth()) 
@@ -105,6 +121,47 @@ int main(void) {
         player.rect.y = 0;
     }
     
+    // enemy collison for walls
+    if ((enemy.rect.x + enemy.rect.width) >= GetScreenWidth()) 
+        {enemy.rect.x = GetScreenWidth() -enemy.rect.width; 
+    } else if (enemy.rect.x <= 0) { 
+        enemy.rect.x = 0;
+    }
+
+    if ((enemy.rect.y +enemy.rect.height) >= GetScreenHeight()) {
+        enemy.rect.y = GetScreenHeight() - enemy.rect.height;
+    } else if (enemy.rect.y <= 0) {
+        enemy.rect.y = 0;
+    }
+
+    // enemy and player collision 
+    Rectangle overlap = GetCollisionRec(player.rect, enemy.rect);
+
+    if (CheckCollisionRecs(player.rect, enemy.rect)) {
+        if (overlap.width < overlap.height) {
+        // Horizontal collision
+            if (player.rect.x < enemy.rect.x) {
+                player.rect.x -= overlap.width; // Hit left side, push further left
+            } else {
+                player.rect.x += overlap.width; // Hit right side, push further right
+            }
+        } else {
+            // Vertical collision
+            if (player.rect.y < enemy.rect.y) {
+                player.rect.y -= overlap.height; // Hit top side, push further up
+            } else {
+                player.rect.y += overlap.height; // Hit bottom side, push further down
+        }
+    }
+
+    player.color = RED;
+    enemy.color = BLUE;
+    } 
+
+    // if (player.rect.x = enemy.rect.x )
+
+
+
     //else framesCounter++;
 
     BeginDrawing();

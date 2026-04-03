@@ -1,0 +1,5 @@
+* CPU Logic                                                   :c:programming:
+
+** Fri 3 April - It goes up                       :programming:c:programming:
+
+if (eneny.rect.y += screeenhight
