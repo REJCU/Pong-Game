@@ -15,7 +15,7 @@ typedef struct Paddle {
 
 int main(void) {
   // float angle = 0;
-  //float rotation = 0.0f;
+  float rotation = 0.0f;
 
   // Initialisation
 
@@ -53,6 +53,7 @@ int main(void) {
       BLUE
   }; 
 
+    
   //bool useGravity = true;
   bool pause = 0;
   int framesCounter = 0; 
@@ -64,14 +65,14 @@ int main(void) {
 
 
     // cpu logic
-    if (enemy.rect.y += GetScreenHeight()/2.0f > ballPosition.y)
+    if (enemy.rect.y != ballPosition.y)
     {
-        enemy.rect.y = enemy.rect.y - enemy.speed; 
+        enemy.rect.y += ballPosition.y / GetScreenHeight(); 
     }
 
-    if (enemy.rect.y += GetScreenHeight()/2.0f < ballPosition.y)
+    if (enemy.rect.x != ballPosition.x)
     {
-        enemy.rect.x = enemy.rect.x + enemy.speed; 
+        enemy.rect.x += ballPosition.x / GetScreenWidth(); 
     }
                                                
     if (IsKeyDown(KEY_RIGHT))
@@ -99,6 +100,7 @@ int main(void) {
     if (CheckCollisionCircleRec( ballPosition, ballRadius, player.rect)) {
         ballSpeed.x *= -1.0f;
         ballSpeed.y *= -1.0f;
+
     }
 
 
