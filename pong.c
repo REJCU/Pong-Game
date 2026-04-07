@@ -27,7 +27,7 @@ int main(void) {
 
   // add rectangle position - could init here
   // this inits the position
-  Vector2 rectPosition = { GetScreenWidth() / 2.0f, GetScreenHeight() / 2.0f};
+  Vector2 rectPosition = { GetScreenWidth() / 4.0f, GetScreenHeight() / 4.0f};
   Vector2 rectSize = {100, 50};
   // Vector2 rectSpeed = {5.0f, 4.0f};
 
@@ -64,16 +64,6 @@ int main(void) {
   while (!WindowShouldClose()) {
 
 
-    // cpu logic
-    if (enemy.rect.y != ballPosition.y)
-    {
-        enemy.rect.y += ballPosition.y / GetScreenHeight(); 
-    }
-
-    if (enemy.rect.x != ballPosition.x)
-    {
-        enemy.rect.x += ballPosition.x / GetScreenWidth(); 
-    }
                                                
     if (IsKeyDown(KEY_RIGHT))
       player.rect.x += 5.0f;
@@ -87,6 +77,29 @@ int main(void) {
     // calculating the ball position
     ballPosition.x += ballSpeed.x;
     ballPosition.y += ballSpeed.y;
+
+    // cpu logic
+    // need to make a function that constantly gets position of ball 
+    if (enemy.rect.y < ballPosition.y)
+    {
+        enemy.rect.y += ballPosition.y / GetScreenHeight() || ballPosition.y; 
+    }
+
+
+    if (enemy.rect.y > ballPosition.y)
+    {
+        enemy.rect.y -= ballPosition.y / GetScreenHeight() || ballPosition.y; 
+    }
+
+    if (enemy.rect.x > ballPosition.x)
+    {
+        enemy.rect.x += ballPosition.x / GetScreenWidth() || ballPosition.x; 
+    }
+
+    if (enemy.rect.x < ballPosition.x)
+    {
+        enemy.rect.x -= ballPosition.x / GetScreenWidth() || ballPosition.x; 
+    }
 
     //if (useGravity) ballSpeed.y += gravity;
 
