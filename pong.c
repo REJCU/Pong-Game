@@ -18,6 +18,9 @@ int main(void) {
   float rotation = 0.0f;
 
   // Initialisation
+    
+  const float gameSpeed = 1.0f;
+  const float cpuPenalty = 10.0f; 
 
   const int screenWidth = 800;
   const int screenHeight = 800;
@@ -43,13 +46,13 @@ int main(void) {
 
   Paddle player = {
       {rectPosition.x, rectPosition.y, rectSize.x, rectSize.y},
-         5.0f, 
+         15.0f, 
          RED
   }; 
 
   Paddle enemy = {
       {rectPosition.x, rectPosition.y, rectSize.x, rectSize.y},
-      5.0f, 
+      15.0f, 
       BLUE
   }; 
 
@@ -82,23 +85,23 @@ int main(void) {
     // need to make a function that constantly gets position of ball 
     if (enemy.rect.y < ballPosition.y)
     {
-        enemy.rect.y += ballPosition.y / GetScreenHeight() || ballPosition.y; 
+       // enemy.rect.y += ballPosition.y / GetScreenHeight() || ballPosition.y; 
+       enemy.rect.y += gameSpeed - cpuPenalty; 
     }
-
-
-    if (enemy.rect.y > ballPosition.y)
+    else if (enemy.rect.y > ballPosition.y) 
     {
-        enemy.rect.y -= ballPosition.y / GetScreenHeight() || ballPosition.y; 
+        enemy.rect.y -= gameSpeed - cpuPenalty; 
     }
 
-    if (enemy.rect.x > ballPosition.x)
-    {
-        enemy.rect.x += ballPosition.x / GetScreenWidth() || ballPosition.x; 
-    }
 
     if (enemy.rect.x < ballPosition.x)
     {
-        enemy.rect.x -= ballPosition.x / GetScreenWidth() || ballPosition.x; 
+        enemy.rect.x += enemy.speed - cpuPenalty;
+    }
+
+    else if (enemy.rect.x > ballPosition.x)
+    {
+        enemy.rect.x -= enemy.speed - cpuPenalty; 
     }
 
     //if (useGravity) ballSpeed.y += gravity;
