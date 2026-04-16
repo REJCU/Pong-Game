@@ -1,3 +1,4 @@
+#include <asm-generic/errno.h>
 #include <raylib.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -19,39 +20,47 @@ int main(void) {
 
   // Initialisation
     
-  const float gameSpeed = 1.0f;
-  const float cpuPenalty = 10.0f; 
+  // declare everything related to game here - no more magic words
+  const float gameSpeed = 9.0f;
+  const float playerSpeed = 5.0f;
+  const float cpuPenalty = 95.0f; 
 
   const int screenWidth = 800;
   const int screenHeight = 800;
+
+  // score 
+  const int player_score = 0; 
+  const int enemy_score = 0; 
 
   SetConfigFlags(FLAG_MSAA_4X_HINT);
   InitWindow(screenWidth, screenHeight, "raylib window");
 
   // add rectangle position - could init here
   // this inits the position
-  Vector2 rectPosition = { GetScreenWidth() / 4.0f, GetScreenHeight() / 4.0f};
+  Vector2 enemyRect = { GetScreenWidth(), GetScreenHeight()};
+  Vector2 playerPosition = {0, 0};
   Vector2 rectSize = {100, 50};
   // Vector2 rectSpeed = {5.0f, 4.0f};
 
 
-  Rectangle paddleRect = { rectPosition.x, rectPosition.y, rectSize.x, rectSize.y};
+  Rectangle paddleRect = { enemyRect.x, enemyRect.y, rectSize.x, rectSize.y};
+
 
   Vector2 ballPosition = { GetScreenWidth() / 2.0f, GetScreenWidth() / 2.0f};
   
-  Vector2 ballSpeed = {5.0f, 4.0f }; 
+  Vector2 ballSpeed = { gameSpeed, 4.0f }; 
   Vector2 ballSize = {20, 20};
   int ballRadius = 20; 
   float gravity = 0.2f;
 
   Paddle player = {
-      {rectPosition.x, rectPosition.y, rectSize.x, rectSize.y},
+      { playerPosition.x, playerPosition.y, rectSize.x, rectSize.y},
          15.0f, 
          RED
   }; 
 
   Paddle enemy = {
-      {rectPosition.x, rectPosition.y, rectSize.x, rectSize.y},
+      { enemyRect.x, enemyRect.y, rectSize.x, rectSize.y},
       15.0f, 
       BLUE
   }; 
@@ -69,13 +78,9 @@ int main(void) {
 
                                                
     if (IsKeyDown(KEY_RIGHT))
-      player.rect.x += 5.0f;
+      player.rect.x += playerSpeed;
     if (IsKeyDown(KEY_LEFT))
-      player.rect.x -= 5.0f;
-    if (IsKeyDown(KEY_UP))
-      player.rect.y -= 5.0f;
-    if (IsKeyDown(KEY_DOWN))
-      player.rect.y += 5.0f;
+      player.rect.x -= playerSpeed;
 
     // calculating the ball position
     ballPosition.x += ballSpeed.x;
@@ -83,26 +88,17 @@ int main(void) {
 
     // cpu logic
     // need to make a function that constantly gets position of ball 
-    if (enemy.rect.y < ballPosition.y)
+    if (ballPosition.x > enemy.rect.x)
     {
        // enemy.rect.y += ballPosition.y / GetScreenHeight() || ballPosition.y; 
-       enemy.rect.y += gameSpeed - cpuPenalty; 
+       // enemy.rect.y += ballPosition.y;
+       enemy.rect.x =  ballPosition.x - cpuPenalty;
     }
-    else if (enemy.rect.y > ballPosition.y) 
+    else if (ballPosition.x < enemy.rect.x) 
     {
-        enemy.rect.y -= gameSpeed - cpuPenalty; 
+        enemy.rect.x = ballPosition.x - cpuPenalty; 
     }
 
-
-    if (enemy.rect.x < ballPosition.x)
-    {
-        enemy.rect.x += enemy.speed - cpuPenalty;
-    }
-
-    else if (enemy.rect.x > ballPosition.x)
-    {
-        enemy.rect.x -= enemy.speed - cpuPenalty; 
-    }
 
     //if (useGravity) ballSpeed.y += gravity;
 
@@ -192,6 +188,10 @@ int main(void) {
     DrawRectangleRec(player.rect, player.color);
     DrawRectangleRec(enemy.rect, enemy.color);
     
+    DrawText(TextFormat("Score: %i", player_score), 220, 220 ,20,RED); 
+
+    DrawText(TextFormat("frames; %i", framesCounter), 10,10,10, BLUE);
+
     // ball - bounce off of object
     DrawCircleV(ballPosition, 20, GREEN);
 
