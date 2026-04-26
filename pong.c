@@ -1,9 +1,9 @@
 #include <asm-generic/errno.h>
 #include <raylib.h>
 #include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+//#include <stdio.h>
+//#include <stdlib.h>
+//#include <string.h>
 #include <unistd.h>
 
 typedef struct Paddle {
@@ -14,6 +14,14 @@ typedef struct Paddle {
 
 
 
+void ResetBall(Vector2 *ballPosition, Vector2 *ballSpeed) {
+    ballPosition->x = GetScreenWidth() / 2.0f;
+    ballPosition->y = GetScreenHeight() / 2.0f;
+
+    ballSpeed->y *= -1.0f;
+    }
+
+
 int main(void) {
   // float angle = 0;
   float rotation = 0.0f;
@@ -21,16 +29,21 @@ int main(void) {
   // Initialisation
     
   // declare everything related to game here - no more magic words
-  const float gameSpeed = 9.0f;
+  const float gameSpeed = 5.0f;
   const float playerSpeed = 5.0f;
-  const float cpuPenalty = 95.0f; 
+  const int cpuPenalty = 30; 
+
 
   const int screenWidth = 800;
-  const int screenHeight = 800;
+  const int screenHeight = 800; 
+  Vector2 screen = {GetScreenHeight(), GetScreenWidth()};
 
   // score 
-  const int player_score = 0; 
-  const int enemy_score = 0; 
+  int scoreWeight = 1; 
+  int player_score = 0; 
+  int enemy_score = 0; 
+
+  
 
   SetConfigFlags(FLAG_MSAA_4X_HINT);
   InitWindow(screenWidth, screenHeight, "raylib window");
@@ -48,6 +61,7 @@ int main(void) {
 
   Vector2 ballPosition = { GetScreenWidth() / 2.0f, GetScreenWidth() / 2.0f};
   
+
   Vector2 ballSpeed = { gameSpeed, 4.0f }; 
   Vector2 ballSize = {20, 20};
   int ballRadius = 20; 
@@ -64,6 +78,8 @@ int main(void) {
       15.0f, 
       BLUE
   }; 
+
+
 
     
   //bool useGravity = true;
@@ -104,7 +120,7 @@ int main(void) {
 
     // Check collison of walls for bouncing 
     if ((ballPosition.x >= (GetScreenWidth() - ballRadius)) || (ballPosition.x <= ballRadius)) ballSpeed.x *= -1.0f; 
-    if ((ballPosition.y >= (GetScreenWidth() - ballRadius)) || (ballPosition.y <= ballRadius)) ballSpeed.y *= -0.95f; 
+    // if ((ballPosition.y >= (GetScreenWidth() - ballRadius)) || (ballPosition.y <= ballRadius)) ballSpeed.y *= -0.95f; 
     // rotation += 0.2f;
    
 
@@ -114,7 +130,6 @@ int main(void) {
         ballSpeed.y *= -1.0f;
 
     }
-
 
     if (CheckCollisionCircleRec( ballPosition, ballRadius, enemy.rect)) {
         ballSpeed.x *= -1.0f;
@@ -172,7 +187,20 @@ int main(void) {
     enemy.color = BLUE;
     } 
 
-    // if (player.rect.x = enemy.rect.x )
+    // score logic 
+    // If ball goes off the bottom, Player 2 (Enemy) scores
+    if (ballPosition.y >= GetScreenHeight() - ballRadius) {
+        enemy_score += 1;
+        ResetBall(&ballPosition, &ballSpeed); 
+} 
+
+    // If ball goes off the top, Player 1 scores
+    else if (ballPosition.y <= - ballRadius) {
+        player_score += 1;
+        ResetBall(&ballPosition, &ballSpeed); 
+
+}
+
 
 
 
@@ -188,10 +216,12 @@ int main(void) {
     DrawRectangleRec(player.rect, player.color);
     DrawRectangleRec(enemy.rect, enemy.color);
     
-    DrawText(TextFormat("Score: %i", player_score), 220, 220 ,20,RED); 
 
     DrawText(TextFormat("frames; %i", framesCounter), 10,10,10, BLUE);
 
+    // Inside your BeginDrawing() block:
+    DrawText(TextFormat("Player: %i", player_score), 50, 20, 20, RED);
+    DrawText(TextFormat("Enemy: %i", enemy_score), GetScreenWidth() - 150, 20, 20, BLUE);
     // ball - bounce off of object
     DrawCircleV(ballPosition, 20, GREEN);
 
