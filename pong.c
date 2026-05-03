@@ -6,19 +6,35 @@
 //#include <string.h>
 #include <unistd.h>
 
+#if defined(PLATFORM_DESKTOP)
+    #define GLSL_VERSION            330
+#else   // PLATFORM_ANDROID, PLATFORM_WEB
+    #define GLSL_VERSION            100
+#endif
+
+#define MAX_POSTPRO_SHADERS         12
+
+typedef enum{
+    FX_CRT
+} PostProcShader;
+
 typedef struct Paddle {
     Rectangle rect; 
     float speed; 
     Color color; 
 } Paddle;
 
+// global variables definition
+static const char *postprocshader[] = {
+    "Crt"
+};
 
 
 void ResetBall(Vector2 *ballPosition, Vector2 *ballSpeed) {
     ballPosition->x = GetScreenWidth() / 2.0f;
     ballPosition->y = GetScreenHeight() / 2.0f;
 
-    ballSpeed->y *= -1.0f;
+    ballSpeed->y *= 1.0f;
     }
 
 
@@ -34,9 +50,11 @@ int main(void) {
   const int cpuPenalty = 30; 
 
 
+  const int fps = 60;
   const int screenWidth = 800;
   const int screenHeight = 800; 
   Vector2 screen = {GetScreenHeight(), GetScreenWidth()};
+
 
   // score 
   int scoreWeight = 1; 
@@ -84,9 +102,21 @@ int main(void) {
     
   //bool useGravity = true;
   bool pause = 0;
-  int framesCounter = 0; 
+  int framesCounter = fps; 
 
-  SetTargetFPS(60);
+  //shaders 
+
+  Shader shaders[MAX_POSTPRO_SHADERS] = { 0 };
+  shaders[FX_CRT] = LoadShader(0, TextFormat("resources/shaders/crt.fs", GLSL_VERSION));
+
+  int currentShader = FX_CRT;
+  int timeLoc = GetShaderLocation(shaders[1], "time");
+
+  float seconds = GetTime();
+  SetShaderValue(shaders[1], timeLoc, &seconds, SHADER_UNIFORM_FLOAT);
+  RenderTexture2D target = LoadRenderTexture(screenWidth, screenHeight);
+
+  SetTargetFPS(fps);
 
   // game loop - does not close until window is shut
   while (!WindowShouldClose()) {
@@ -190,34 +220,37 @@ int main(void) {
     // score logic 
     // If ball goes off the bottom, Player 2 (Enemy) scores
     if (ballPosition.y >= GetScreenHeight() - ballRadius) {
-        enemy_score += 1;
+         player_score += 1;
         ResetBall(&ballPosition, &ballSpeed); 
 } 
 
     // If ball goes off the top, Player 1 scores
     else if (ballPosition.y <= - ballRadius) {
-        player_score += 1;
+         enemy_score += 1;
         ResetBall(&ballPosition, &ballSpeed); 
 
 }
 
 
 
-
     //else framesCounter++;
 
+
+    BeginTextureMode(target);
+        ClearBackground(RAYWHITE);
+    EndTextureMode();
+
     BeginDrawing();
-
-    ClearBackground(RAYWHITE);
-
+    BeginShaderMode(shaders[currentShader]);
+        DrawTextureRec(target.texture, (Rectangle){0,0, target.texture.width, -target.texture.height }, (Vector2){0,0},RAYWHITE);
+    EndShaderMode();
     // DrawText("First window", 190, 200, 20, LIGHTGRAY);
 
     // DrawRectangleRec(paddleRect, RED);
+    
     DrawRectangleRec(player.rect, player.color);
     DrawRectangleRec(enemy.rect, enemy.color);
-    
 
-    DrawText(TextFormat("frames; %i", framesCounter), 10,10,10, BLUE);
 
     // Inside your BeginDrawing() block:
     DrawText(TextFormat("Player: %i", player_score), 50, 20, 20, RED);
@@ -228,12 +261,18 @@ int main(void) {
     // DrawRectangle(screenWidth - 50 - 20, screenHeight / 2 - 50, 50, 100,
     // BLUE);
 
+    DrawFPS(10,10);
+        
+
     EndDrawing();
   }
 
-  // add logic for player control for RED rectangle
+for (int i = 0; i < MAX_POSTPRO_SHADERS; i++) UnloadShader(shaders[i]);
+UnloadRenderTexture(target);
 
-  CloseWindow();
+// add logic for player control for RED rectangle
 
-  return 0;
-  }
+CloseWindow();
+
+return 0;
+}
