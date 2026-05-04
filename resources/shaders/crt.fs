@@ -1,29 +1,53 @@
 #version 330
 
-// Input vertex attributes (from Raylib)
 in vec2 fragTexCoord;
 in vec4 fragColor;
 
-// Output color
 out vec4 finalColor;
 
-// Custom variables (Uniforms)
-uniform vec2 resolution;
-uniform float time;
+uniform sampler2D texture0;
+
+uniform vec2 renderResolution; 
+uniform float time;         
+
+const float curvature = 0.1; 
+const float scanlineIntensity = 0.75; 
+const float vignetteIntensity = 0.9; 
+
+vec2 curveUV(vec2 uv) {
+    uv = uv * 2.0 - 1.0; 
+    
+    vec2 offset = abs(uv.yx) * curvature;
+    uv = uv + uv * offset * offset;
+    
+    uv = uv * 0.5 + 0.5; 
+    return uv;
+}
 
 void main() {
-    // Calculate distance from the center of the texcoord (0.5, 0.5)
-    float dist = distance(fragTexCoord, vec2(0.5));
-
-    // Create a soft glow effect using a smoothstep or power function
-    // The closer to the center, the brighter it is.
-    float glow = 0.05 / (dist * dist); 
-
-    // Pulse the glow slightly using the time uniform
-    float pulse = 0.8 + 0.2 * sin(time * 5.0);
+    vec2 uv = curveUV(fragTexCoord);
     
-    // Final color: Base color * intensity * pulse
-    vec3 color = fragColor.rgb * glow * pulse;
+    if (uv.x < 0.0 || uv.x > 1.0 || uv.y < 0.0 || uv.y > 1.0) {
+        finalColor = vec4(0.0, 0.0, 0.0, 1.0); // Black borders
+        return;
+    }
+
+    float distortion = 0.003;
+    float r = texture(texture0, uv + vec2(distortion, 0.0)).r;
+    float g = texture(texture0, uv).g;
+    float b = texture(texture0, uv - vec2(distortion, 0.0)).b;
+    vec3 color = vec3(r, g, b);
+
+    float count = renderResolution.y * 1.5; // Number of lines depends on resolution
+    float scanline = sin(uv.y * count) * scanlineIntensity;
+    color -= scanline; // Darken the lines
+
+    float flicker = 0.01 * sin(time * 50.0);
+    color += flicker;
+
+    float vignette = uv.x * uv.y * (1.0 - uv.x) * (1.0 - uv.y);
+    vignette = pow(vignette * 16.0, vignetteIntensity);
+    color *= vignette;
 
     finalColor = vec4(color, 1.0);
 }

@@ -4,6 +4,7 @@
 //#include <stdio.h>
 //#include <stdlib.h>
 //#include <string.h>
+#include <stdio.h>
 #include <unistd.h>
 
 #if defined(PLATFORM_DESKTOP)
@@ -38,6 +39,7 @@ void ResetBall(Vector2 *ballPosition, Vector2 *ballSpeed) {
     }
 
 
+
 int main(void) {
   // float angle = 0;
   float rotation = 0.0f;
@@ -45,12 +47,14 @@ int main(void) {
   // Initialisation
     
   // declare everything related to game here - no more magic words
-  const float gameSpeed = 5.0f;
-  const float playerSpeed = 5.0f;
-  const int cpuPenalty = 30; 
+  const float gameSpeed = 9.0f;
+  const float playerSpeed = 9.0f;
+  const int cpuPenalty = 120; 
+
+  const int speedUp = 5;
 
 
-  const int fps = 60;
+  const int fps = 100;
   const int screenWidth = 800;
   const int screenHeight = 800; 
   Vector2 screen = {GetScreenHeight(), GetScreenWidth()};
@@ -60,7 +64,7 @@ int main(void) {
   int scoreWeight = 1; 
   int player_score = 0; 
   int enemy_score = 0; 
-
+  int total_score = 0;
   
 
   SetConfigFlags(FLAG_MSAA_4X_HINT);
@@ -98,11 +102,9 @@ int main(void) {
   }; 
 
 
-
     
   //bool useGravity = true;
   bool pause = 0;
-  int framesCounter = fps; 
 
   //shaders 
 
@@ -115,6 +117,8 @@ int main(void) {
   float seconds = GetTime();
   SetShaderValue(shaders[1], timeLoc, &seconds, SHADER_UNIFORM_FLOAT);
   RenderTexture2D target = LoadRenderTexture(screenWidth, screenHeight);
+
+
 
   SetTargetFPS(fps);
 
@@ -160,13 +164,19 @@ int main(void) {
         ballSpeed.y *= -1.0f;
 
     }
-
-    if (CheckCollisionCircleRec( ballPosition, ballRadius, enemy.rect)) {
+    else if (CheckCollisionCircleRec( ballPosition, ballRadius, enemy.rect))
+    {
         ballSpeed.x *= -1.0f;
         ballSpeed.y *= -1.0f;
     }
 
-    
+    // if ball hits paddle, gets initial boost of speed 
+    if (total_score > 0 && total_score % 5 == 0) {
+        ballSpeed.x += 2.0f;
+        ballSpeed.y += 2.0f;
+        printf("speedUp: %d\n", total_score);
+    }
+
     // Check collison for rectangle of walls 
     if ((player.rect.x + player.rect.width) >= GetScreenWidth()) 
         {player.rect.x = GetScreenWidth() -player.rect.width; 
@@ -222,14 +232,16 @@ int main(void) {
     if (ballPosition.y >= GetScreenHeight() - ballRadius) {
          player_score += 1;
         ResetBall(&ballPosition, &ballSpeed); 
+        total_score += scoreWeight;
 } 
 
     // If ball goes off the top, Player 1 scores
     else if (ballPosition.y <= - ballRadius) {
          enemy_score += 1;
         ResetBall(&ballPosition, &ballSpeed); 
-
+        total_score += scoreWeight;
 }
+
 
 
 
@@ -237,7 +249,7 @@ int main(void) {
 
 
     BeginTextureMode(target);
-        ClearBackground(RAYWHITE);
+        ClearBackground(PURPLE);
     EndTextureMode();
 
     BeginDrawing();
@@ -255,6 +267,7 @@ int main(void) {
     // Inside your BeginDrawing() block:
     DrawText(TextFormat("Player: %i", player_score), 50, 20, 20, RED);
     DrawText(TextFormat("Enemy: %i", enemy_score), GetScreenWidth() - 150, 20, 20, BLUE);
+    DrawText(TextFormat("Total Score: %i", total_score), 325, 20, 20, GREEN);
     // ball - bounce off of object
     DrawCircleV(ballPosition, 20, GREEN);
 
@@ -275,4 +288,4 @@ UnloadRenderTexture(target);
 CloseWindow();
 
 return 0;
-}
+};
